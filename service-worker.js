@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fahari-cache-v4';
+const CACHE_NAME = 'fahari-cache-v5';
 const APP_SHELL = [
   './',
   './index.html',
