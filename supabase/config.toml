@@ -1,0 +1,22 @@
+project_id = "mvgpngbwlrhhzzxwiqrt"
+
+[functions.fahari-c2b-validation]
+verify_jwt = false
+
+[functions.fahari-payment-callback]
+verify_jwt = false
+
+[functions.register-fahari-business]
+verify_jwt = false
+
+[functions.register-daraja]
+verify_jwt = true
+
+[functions.start-service-payment]
+verify_jwt = true
+
+[functions.service-payment-callback]
+verify_jwt = false
+
+[functions.service-daraja-diagnostics]
+verify_jwt = true

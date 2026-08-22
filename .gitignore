@@ -1,0 +1,6 @@
+.env
+.env.local
+.npm-cache/
+.tools/
+.supabase/
+supabase/.temp/
