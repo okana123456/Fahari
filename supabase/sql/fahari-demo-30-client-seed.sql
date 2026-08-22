@@ -9,10 +9,14 @@
 
 begin;
 
+drop table if exists _fahari_demo_loans;
+drop table if exists _fahari_demo_rows;
+drop table if exists _fahari_demo_target;
+
 create temporary table _fahari_demo_target (
   business_id text primary key,
   admin_id uuid not null
-) on commit drop;
+);
 
 do $$
 declare
@@ -148,7 +152,7 @@ cross join officers o;
 
 -- A reusable calculation table keeps the loan, schedule and repayment maths
 -- aligned with Fahari's flat-interest product rules.
-create temporary table _fahari_demo_rows on commit drop as
+create temporary table _fahari_demo_rows as
 with numbered_clients as (
   select
     c.*,
@@ -286,7 +290,7 @@ join public.loan_applications a
   on a.business_id = d.business_id
  and a.application_no = 'DEMO-APP-' || lpad(d.i::text, 3, '0');
 
-create temporary table _fahari_demo_loans on commit drop as
+create temporary table _fahari_demo_loans as
 select
   d.*,
   l.id as loan_id,
@@ -630,5 +634,9 @@ select
   (select round(coalesce(sum(arrears_amount),0),2) from public.loans where business_id = t.business_id and loan_no like 'DEMO-LN-%') as current_arrears,
   (select count(*) from public.unmatched_payments where business_id = t.business_id and mpesa_reference like 'DEMO-SUSP-%') as suspense_examples
 from _fahari_demo_target t;
+
+drop table if exists _fahari_demo_loans;
+drop table if exists _fahari_demo_rows;
+drop table if exists _fahari_demo_target;
 
 commit;
