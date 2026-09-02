@@ -367,7 +367,7 @@ tr:hover{background:rgba(37,99,235,.04)}
 
 <script>
 // ═══ SUPABASE INIT ═══
-const APP_VERSION = 'fahari-2026-08-22-launch-v1';
+const APP_VERSION = 'fahari-2026-09-02-demo-billing-grace-v1';
 const SUPABASE_URL = 'https://mvgpngbwlrhhzzxwiqrt.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_66nHg1r3aH1qS9UFVjgGJg_TyZ6Po0Y';
 // Added custom storageKey to prevent GoTrue orphaned lock hanging in the browser.
@@ -392,6 +392,7 @@ const SERVICE_BILLING_AMOUNT = 3000;
 const SERVICE_BILLING_FIRST_REMINDER_DATE = '2026-09-02';
 const SERVICE_BILLING_REMINDER_DAY = 2;
 const SERVICE_BILLING_LOCK_DAY = 4;
+const DEMO_BILLING_PAID_UNTIL = '2027-03-02';
 
 async function refreshFahariBrowserCache(){
   const versionKey = 'fahari_app_version';
@@ -921,6 +922,9 @@ function isBeforeServiceBillingStart(){
 function isServiceBillingUser(){
   return !!currentUser && hasRole('admin','branch_manager');
 }
+function isDemoBillingGraceActive(){
+  return localISODate() <= DEMO_BILLING_PAID_UNTIL;
+}
 function serviceBillingCacheKey(){
   return `fahari_service_billing_${currentUser?.business_id || 'none'}_${serviceBillingMonth()}`;
 }
@@ -941,7 +945,7 @@ async function loadServiceBillingStatus({silent=false}={}){
   if(!currentUser?.business_id || !isServiceBillingUser()) return;
   const month = serviceBillingMonth();
   const todayStr = localISODate();
-  if(isBeforeServiceBillingStart()){
+  if(isDemoBillingGraceActive() || isBeforeServiceBillingStart()){
     setServiceBillingState({
       status:'paid',
       paid:true,
@@ -949,7 +953,7 @@ async function loadServiceBillingStatus({silent=false}={}){
       reminder:false,
       pending:false,
       cycleMonth:month,
-      row:null
+      row:{ status:'paid', paid_until:DEMO_BILLING_PAID_UNTIL, receipt_number:'DEMO-GRACE' }
     });
     renderServiceBillingOverlay();
     return;
@@ -989,6 +993,7 @@ function removeServiceBillingOverlay(){
 }
 function renderServiceBillingOverlay(){
   removeServiceBillingOverlay();
+  if(isDemoBillingGraceActive()) return;
   if(isBeforeServiceBillingStart()) return;
   if(!isServiceBillingUser() || serviceBilling.paid || (!serviceBilling.locked && !serviceBilling.reminder)) return;
   const minimized = !serviceBilling.locked && localStorage.getItem(serviceBillingMinKey()) === '1';
